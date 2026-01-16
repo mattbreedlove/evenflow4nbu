@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -30,27 +30,8 @@ jobs:
         # Compile the C code
         gcc -O2 -static -pthread evenflow4nbu.c -o evenflow4nbu
 
-    - name: Upload binary as artifact using @actions/artifacts
-      run: |
-        # Install dependencies for Node.js script
-        npm install @actions/core @actions/artifacts
-        
-        # Use Node.js to upload the artifact
-        node -e "
-        const core = require('@actions/core');
-        const artifact = require('@actions/artifacts');
-        const artifactClient = artifact.create();
-
-        const paths = ['evenflow4nbu'];  # Path to your compiled binary
-        const name = 'evenflow4nbu-binary';  # Name of the artifact
-
-        async function uploadArtifact() {
-          const uploadResponse = await artifactClient.uploadArtifact(name, paths, process.cwd());
-          if (uploadResponse.failedItems.length > 0) {
-            core.setFailed('Artifact upload failed.');
-          }
-        }
-        uploadArtifact();
-        "
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload binary as artifact using actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2  # Using v2 as it's currently stable
+      with:
+        name: evenflow4nbu-binary
+        path: evenflow4nbu
