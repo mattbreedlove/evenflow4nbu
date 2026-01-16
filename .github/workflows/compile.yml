@@ -3,10 +3,10 @@ name: Compile C Code
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to the main branch
   pull_request:
     branches:
-      - main
+      - main  # Trigger on PR to the main branch
 
 jobs:
   build:
@@ -21,27 +21,17 @@ jobs:
 
     - name: Compile C code
       run: |
+        # Ensure the file exists before compiling
+        if [ ! -f "evenflow4nbu.c" ]; then
+          echo "Error: evenflow4nbu.c not found!"
+          exit 1
+        fi
+        
+        # Compile the C code
         gcc -O2 -static -pthread evenflow4nbu.c -o evenflow4nbu
 
     - name: Upload binary as artifact
-      run: |
-        # Use GitHub's new artifact upload tool
-        node -e "
-        const core = require('@actions/core');
-        const artifact = require('@actions/artifacts');
-        const artifactClient = artifact.create();
-        
-        const paths = ['evenflow4nbu']; // Path to your compiled binary
-        const name = 'evenflow4nbu-binary'; // Name of the artifact
-        
-        async function uploadArtifact() {
-          const artifactName = name;
-          const uploadResponse = await artifactClient.uploadArtifact(artifactName, paths, process.cwd());
-          if (uploadResponse.failedItems.length > 0) {
-            core.setFailed('Artifact upload failed.');
-          }
-        }
-        uploadArtifact();
-        "
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/upload-artifact@v3  # Using the artifact upload action again (still works)
+      with:
+        name: evenflow4nbu-binary
+        path: evenflow4nbu
