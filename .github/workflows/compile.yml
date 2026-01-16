@@ -3,7 +3,7 @@ name: Compile C Code
 on:
   push:
     branches:
-      - main  # This will trigger the action on push to main branch
+      - main  # This will trigger the action on push to the main branch
   pull_request:
     branches:
       - main  # This will also trigger on PRs to the main branch
@@ -24,7 +24,7 @@ jobs:
         gcc -O2 -static -pthread evenflow4nbu.c -o evenflow4nbu
 
     - name: Upload binary as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Updated version
       with:
         name: evenflow4nbu-binary
         path: evenflow4nbu
