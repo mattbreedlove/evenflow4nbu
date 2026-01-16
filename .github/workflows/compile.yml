@@ -3,10 +3,10 @@ name: Compile C Code
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Trigger on PR to the main branch
+      - main
 
 jobs:
   build:
@@ -24,7 +24,24 @@ jobs:
         gcc -O2 -static -pthread evenflow4nbu.c -o evenflow4nbu
 
     - name: Upload binary as artifact
-      uses: actions/upload-artifact@v3  # Correct action, will work despite deprecation notice
-      with:
-        name: evenflow4nbu-binary
-        path: evenflow4nbu
+      run: |
+        # Use GitHub's new artifact upload tool
+        node -e "
+        const core = require('@actions/core');
+        const artifact = require('@actions/artifacts');
+        const artifactClient = artifact.create();
+        
+        const paths = ['evenflow4nbu']; // Path to your compiled binary
+        const name = 'evenflow4nbu-binary'; // Name of the artifact
+        
+        async function uploadArtifact() {
+          const artifactName = name;
+          const uploadResponse = await artifactClient.uploadArtifact(artifactName, paths, process.cwd());
+          if (uploadResponse.failedItems.length > 0) {
+            core.setFailed('Artifact upload failed.');
+          }
+        }
+        uploadArtifact();
+        "
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
